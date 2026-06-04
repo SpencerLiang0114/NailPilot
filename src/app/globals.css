@@ -107,7 +107,7 @@ select {
 
 .keyword-form > div {
   display: grid;
-  grid-template-columns: 20px 1fr 42px;
+  grid-template-columns: 20px 1fr auto;
   gap: 10px;
   align-items: center;
   min-height: 52px;
@@ -128,15 +128,25 @@ select {
 }
 
 .keyword-form button {
-  display: grid;
-  width: 42px;
+  display: inline-flex;
+  min-width: 112px;
   height: 42px;
-  place-items: center;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   border: 0;
   border-radius: 8px;
   color: white;
   background: var(--jade);
   cursor: pointer;
+  font-size: 14px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.keyword-form button:disabled {
+  cursor: wait;
+  opacity: 0.72;
 }
 
 .logic-strip {
@@ -528,6 +538,15 @@ select {
   .hotspot-sections,
   .summary-meta {
     grid-template-columns: 1fr;
+  }
+
+  .keyword-form > div {
+    grid-template-columns: 20px 1fr;
+  }
+
+  .keyword-form button {
+    grid-column: 1 / -1;
+    width: 100%;
   }
 
   .score-ring {

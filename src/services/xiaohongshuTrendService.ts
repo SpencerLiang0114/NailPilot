@@ -4,6 +4,11 @@ import type { NormalizedXhsTrend } from "@/types/manicureHotspots";
 
 type JsonRecord = Record<string, unknown>;
 
+const DEFAULT_XHS_API_BASE_URL = "https://rnote.dev";
+const DEFAULT_XHS_HOT_SEARCH_ENDPOINT =
+  "/api/v2/crawler/creator/hot/inspiration/feed";
+const DEFAULT_XHS_KEYWORD_SEARCH_ENDPOINT = "/api/v2/crawler/search/notes";
+
 interface XhsApiConfig {
   baseUrl: string;
   token: string;
@@ -11,8 +16,9 @@ interface XhsApiConfig {
   keywordSearchEndpoint?: string;
   method: "GET" | "POST";
   authHeader: string;
-  authScheme: string;
+  authScheme?: string;
   extraHeaders: Record<string, string>;
+  hotSearchPageSize: string;
 }
 
 export class XhsApiConfigMissingError extends Error {
@@ -35,7 +41,9 @@ export class XhsApiRequestError extends Error {
 
 export async function fetchXhsHotTrends(): Promise<NormalizedXhsTrend[]> {
   const config = getXhsApiConfig();
-  const payload = await requestXhsApi(config, config.hotSearchEndpoint);
+  const payload = await requestXhsApi(config, config.hotSearchEndpoint, {
+    num: config.hotSearchPageSize
+  });
 
   return normalizeXhsResponse(payload);
 }
@@ -50,20 +58,29 @@ export async function fetchXhsKeywordTrends(
   }
 
   const payload = await requestXhsApi(config, config.keywordSearchEndpoint, {
-    keyword
+    keyword,
+    page: "1",
+    sort_type: "popularity_descending",
+    note_type: "不限",
+    time_filter: "一周内",
+    source: "explore_feed",
+    ai_mode: "0"
   });
 
   return normalizeXhsResponse(payload);
 }
 
 function getXhsApiConfig(): XhsApiConfig {
-  const baseUrl = process.env.XHS_API_BASE_URL?.trim();
+  const baseUrl =
+    process.env.XHS_API_BASE_URL?.trim() || DEFAULT_XHS_API_BASE_URL;
   const token = process.env.XHS_API_TOKEN?.trim();
-  const hotSearchEndpoint = process.env.XHS_HOT_SEARCH_ENDPOINT?.trim();
+  const hotSearchEndpoint =
+    process.env.XHS_HOT_SEARCH_ENDPOINT?.trim() ||
+    DEFAULT_XHS_HOT_SEARCH_ENDPOINT;
 
-  if (!baseUrl || !token || !hotSearchEndpoint) {
+  if (!token) {
     throw new XhsApiConfigMissingError(
-      "Missing Xiaohongshu API configuration. Please configure XHS_API_BASE_URL, XHS_API_TOKEN, and XHS_HOT_SEARCH_ENDPOINT."
+      "Missing Xiaohongshu API configuration. Please configure XHS_API_TOKEN. XHS_API_BASE_URL defaults to https://rnote.dev."
     );
   }
 
@@ -71,11 +88,17 @@ function getXhsApiConfig(): XhsApiConfig {
     baseUrl,
     token,
     hotSearchEndpoint,
-    keywordSearchEndpoint: process.env.XHS_KEYWORD_SEARCH_ENDPOINT?.trim(),
+    keywordSearchEndpoint:
+      process.env.XHS_KEYWORD_SEARCH_ENDPOINT?.trim() ||
+      DEFAULT_XHS_KEYWORD_SEARCH_ENDPOINT,
     method: parseMethod(process.env.XHS_API_METHOD),
-    authHeader: process.env.XHS_API_AUTH_HEADER?.trim() || "Authorization",
-    authScheme: process.env.XHS_API_AUTH_SCHEME?.trim() || "Bearer",
-    extraHeaders: parseExtraHeaders(process.env.XHS_API_EXTRA_HEADERS)
+    authHeader: process.env.XHS_API_AUTH_HEADER?.trim() || "X-API-Key",
+    authScheme: parseAuthScheme(process.env.XHS_API_AUTH_SCHEME),
+    extraHeaders: parseExtraHeaders(process.env.XHS_API_EXTRA_HEADERS),
+    hotSearchPageSize: positiveIntegerString(
+      process.env.XHS_HOT_SEARCH_PAGE_SIZE,
+      "50"
+    )
   };
 }
 
@@ -133,18 +156,31 @@ function normalizeXhsTrend(
   item: unknown,
   index: number
 ): NormalizedXhsTrend | null {
-  const record = asRecord(item);
-  if (!record) {
+  const rawRecord = asRecord(item);
+  if (!rawRecord) {
     return null;
   }
+  const record = flattenKnownXhsRecord(rawRecord);
 
   const keyword =
-    firstString(record, ["keyword", "word", "query", "name", "title"]) || "";
+    firstString(record, [
+      "keyword",
+      "word",
+      "query",
+      "name",
+      "title",
+      "display_title",
+      "note_card_title",
+      "noteTitle"
+    ]) || "";
   const title =
     firstString(record, [
       "title",
+      "display_title",
+      "note_card_title",
       "noteTitle",
       "note_title",
+      "desc",
       "name",
       "keyword",
       "word",
@@ -161,11 +197,21 @@ function normalizeXhsTrend(
     ...extractTags(record.topics),
     ...extractTags(record.topic),
     ...extractTags(record.category),
-    ...extractTags(record.categories)
+    ...extractTags(record.categories),
+    ...extractTags(record.tag_list),
+    ...extractTags(record.tagList)
   ]);
 
   const id =
-    firstString(record, ["id", "noteId", "note_id", "itemId", "item_id"]) ||
+    firstString(record, [
+      "id",
+      "noteId",
+      "note_id",
+      "itemId",
+      "item_id",
+      "noteIdStr",
+      "note_id_str"
+    ]) ||
     createHash("sha1")
       .update(JSON.stringify({ title, keyword, index }))
       .digest("hex")
@@ -180,6 +226,8 @@ function normalizeXhsTrend(
       "desc",
       "summary",
       "content",
+      "noteContent",
+      "note_content",
       "noteDesc",
       "note_desc"
     ]),
@@ -191,6 +239,9 @@ function normalizeXhsTrend(
       "hotValue",
       "hot_value",
       "popularity",
+      "hot",
+      "viewCount",
+      "view_count",
       "score"
     ]),
     rank: firstNumber(record, ["rank", "ranking", "index", "position", "order"]),
@@ -200,7 +251,11 @@ function normalizeXhsTrend(
       "url",
       "link",
       "shareUrl",
-      "share_url"
+      "share_url",
+      "webUrl",
+      "web_url",
+      "noteUrl",
+      "note_url"
     ]),
     tags,
     imageUrls: extractImageUrls(record),
@@ -210,19 +265,81 @@ function normalizeXhsTrend(
         record.createTime ??
         record.create_time ??
         record.createdAt ??
-        record.created_at
+        record.created_at ??
+        record.time ??
+        record.timestamp
     ),
-    likeCount: firstNumber(record, ["likeCount", "like_count", "likes"]),
+    likeCount: firstNumber(record, [
+      "likeCount",
+      "like_count",
+      "likes",
+      "liked_count",
+      "likedCount"
+    ]),
     collectCount: firstNumber(record, [
       "collectCount",
       "collect_count",
       "favorites",
       "favoriteCount",
-      "favorite_count"
+      "favorite_count",
+      "collected_count",
+      "collectedCount"
     ]),
-    commentCount: firstNumber(record, ["commentCount", "comment_count", "comments"]),
-    shareCount: firstNumber(record, ["shareCount", "share_count", "shares"]),
+    commentCount: firstNumber(record, [
+      "commentCount",
+      "comment_count",
+      "comments",
+      "commented_count",
+      "commentedCount"
+    ]),
+    shareCount: firstNumber(record, [
+      "shareCount",
+      "share_count",
+      "shares",
+      "shared_count",
+      "sharedCount"
+    ]),
     raw: item
+  };
+}
+
+function flattenKnownXhsRecord(record: JsonRecord): JsonRecord {
+  const nestedRecords = [
+    record.note,
+    record.note_card,
+    record.noteCard,
+    record.card,
+    record.item,
+    record.target,
+    record.inspiration,
+    record.data
+  ]
+    .map(asRecord)
+    .filter((value): value is JsonRecord => Boolean(value));
+  const interactRecords = [record.interact_info, record.interactInfo];
+
+  for (const nestedRecord of nestedRecords) {
+    interactRecords.push(
+      nestedRecord.interact_info,
+      nestedRecord.interactInfo,
+      nestedRecord.statistics,
+      nestedRecord.stats
+    );
+  }
+
+  return {
+    ...nestedRecords.reduce<JsonRecord>(
+      (merged, nestedRecord) => ({ ...merged, ...nestedRecord }),
+      {}
+    ),
+    ...interactRecords
+      .map(asRecord)
+      .filter((value): value is JsonRecord => Boolean(value))
+      .reduce<JsonRecord>(
+        (merged, nestedRecord) => ({ ...merged, ...nestedRecord }),
+        {}
+      ),
+    ...record
   };
 }
 
@@ -246,7 +363,15 @@ function collectCandidateItems(payload: unknown): unknown[] {
     "trends",
     "hotSearches",
     "hot_searches",
-    "notes"
+    "notes",
+    "feeds",
+    "feed",
+    "results",
+    "inspirations",
+    "note_list",
+    "noteList",
+    "items_list",
+    "itemsList"
   ];
 
   for (const key of likelyArrayKeys) {
@@ -280,6 +405,24 @@ function buildUrl(baseUrl: string, endpoint: string): URL {
 
 function parseMethod(method: string | undefined): "GET" | "POST" {
   return method?.toUpperCase() === "POST" ? "POST" : "GET";
+}
+
+function parseAuthScheme(value: string | undefined): string | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value.trim();
+
+  return normalized && normalized.toLowerCase() !== "none"
+    ? normalized
+    : undefined;
+}
+
+function positiveIntegerString(value: string | undefined, fallback: string): string {
+  const parsed = Number(value);
+
+  return Number.isInteger(parsed) && parsed > 0 ? String(parsed) : fallback;
 }
 
 function parseExtraHeaders(value: string | undefined): Record<string, string> {

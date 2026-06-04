@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Activity,
   ArrowRight,
@@ -16,47 +16,14 @@ import { OperationsDailyReport } from "@/components/ops/OperationsDailyReport";
 import type { ManicureHotspotsApiResponse } from "@/types/manicureHotspots";
 
 type DashboardState =
+  | { status: "idle"; response?: undefined }
   | { status: "loading"; response?: undefined }
   | { status: "success"; response: ManicureHotspotsApiResponse }
   | { status: "error"; message: string };
 
 export function ManicureHotspotDashboard() {
-  const [keyword, setKeyword] = useState("");
-  const [submittedKeyword, setSubmittedKeyword] = useState("");
-  const [state, setState] = useState<DashboardState>({ status: "loading" });
-
-  useEffect(() => {
-    const controller = new AbortController();
-
-    async function loadHotspots() {
-      setState({ status: "loading" });
-      const params = new URLSearchParams({ source: "xhs", limit: "5" });
-      if (submittedKeyword) {
-        params.set("keyword", submittedKeyword);
-      }
-
-      try {
-        const response = await fetch(`/api/ops/manicure-hotspots?${params}`, {
-          signal: controller.signal,
-          cache: "no-store"
-        });
-        const json = (await response.json()) as ManicureHotspotsApiResponse;
-        setState({ status: "success", response: json });
-      } catch (error) {
-        if (error instanceof DOMException && error.name === "AbortError") {
-          return;
-        }
-        setState({
-          status: "error",
-          message: error instanceof Error ? error.message : "请求运营日报失败。"
-        });
-      }
-    }
-
-    loadHotspots();
-
-    return () => controller.abort();
-  }, [submittedKeyword]);
+  const [keyword, setKeyword] = useState("美甲");
+  const [state, setState] = useState<DashboardState>({ status: "idle" });
 
   const data =
     state.status === "success" && state.response.success
@@ -79,9 +46,28 @@ export function ManicureHotspotDashboard() {
     }).format(new Date(data.generatedAt));
   }, [data]);
 
-  function submitKeyword(event: React.FormEvent<HTMLFormElement>) {
+  async function generateReport(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setSubmittedKeyword(keyword.trim());
+    setState({ status: "loading" });
+
+    const params = new URLSearchParams({ source: "xhs", limit: "5" });
+    const trimmedKeyword = keyword.trim();
+    if (trimmedKeyword) {
+      params.set("keyword", trimmedKeyword);
+    }
+
+    try {
+      const response = await fetch(`/api/ops/manicure-hotspots?${params}`, {
+        cache: "no-store"
+      });
+      const json = (await response.json()) as ManicureHotspotsApiResponse;
+      setState({ status: "success", response: json });
+    } catch (error) {
+      setState({
+        status: "error",
+        message: error instanceof Error ? error.message : "请求运营日报失败。"
+      });
+    }
   }
 
   return (
@@ -93,7 +79,7 @@ export function ManicureHotspotDashboard() {
           <p className="subtitle">基于小红书实时趋势生成今日运营日报与款式调整建议</p>
         </div>
 
-        <form className="keyword-form" onSubmit={submitKeyword}>
+        <form className="keyword-form" onSubmit={generateReport}>
           <label htmlFor="keyword">关键词追踪</label>
           <div>
             <Search size={17} />
@@ -103,8 +89,9 @@ export function ManicureHotspotDashboard() {
               onChange={(event) => setKeyword(event.target.value)}
               placeholder="美甲 / 猫眼 / 穿戴甲"
             />
-            <button type="submit">
+            <button type="submit" disabled={state.status === "loading"}>
               <ArrowRight size={17} />
+              <span>{state.status === "loading" ? "生成中" : "生成报告"}</span>
             </button>
           </div>
         </form>
@@ -128,6 +115,8 @@ export function ManicureHotspotDashboard() {
         />
       </section>
 
+      {state.status === "idle" ? <IdleState /> : null}
+
       {state.status === "loading" ? <LoadingState /> : null}
 
       {state.status === "error" ? <ErrorState message={state.message} /> : null}
@@ -136,7 +125,7 @@ export function ManicureHotspotDashboard() {
         <ErrorState
           title={
             error.code === "XHS_API_CONFIG_MISSING"
-              ? "等待配置小红书 API，暂无法生成真实趋势报告。"
+              ? "未读取到小红书 API Key，暂无法生成真实趋势报告。"
               : "小红书 API 请求失败"
           }
           message={error.message}
@@ -219,6 +208,15 @@ function WorkflowCard({
       <h2>{title}</h2>
       <p>{description}</p>
     </article>
+  );
+}
+
+function IdleState() {
+  return (
+    <section className="status-panel status-empty">
+      <h2>点击“生成报告”后获取小红书真实趋势。</h2>
+      <p>进入页面不会自动消耗接口调用；系统只会在你手动触发后生成今日热点 Review 与运营日报。</p>
+    </section>
   );
 }
 
