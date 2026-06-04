@@ -4,16 +4,19 @@ import { useMemo, useState } from "react";
 import {
   Activity,
   ArrowRight,
+  BarChart3,
+  CalendarDays,
+  CheckCircle2,
   FileText,
   RefreshCw,
   Search,
   SlidersHorizontal,
   Sparkles
 } from "lucide-react";
-import { HotspotInsightCard } from "@/components/ops/HotspotInsightCard";
-import { IntelligentExecutionPanel } from "@/components/ops/IntelligentExecutionPanel";
-import { OperationsDailyReport } from "@/components/ops/OperationsDailyReport";
-import type { ManicureHotspotsApiResponse } from "@/types/manicureHotspots";
+import type {
+  ManicureHotspotsApiResponse,
+  ManicureHotspotsData
+} from "@/types/manicureHotspots";
 
 type DashboardState =
   | { status: "idle"; response?: undefined }
@@ -134,62 +137,187 @@ export function ManicureHotspotDashboard() {
 
       {data ? (
         <section className="dashboard-grid">
-          <article className="summary-panel">
-            <div>
-              <p>今日热点报告</p>
-              <h2>{data.topHotspots.length > 0 ? "美甲热点 Review" : "暂无真实趋势数据"}</h2>
-            </div>
-            <p className="summary-text">
-              {data.topHotspots.length > 0
-                ? data.summary
-                : "当前未识别到明确的美甲相关热点。"}
-            </p>
-            <div className="summary-meta">
-              <span>来源：Xiaohongshu</span>
-              <span>生成：{generatedTime}</span>
-              <span>趋势数：{data.topHotspots.length}</span>
-            </div>
-          </article>
-
           {data.topHotspots.length > 0 ? (
-            <section className="hotspot-list">
-              {data.topHotspots.map((hotspot, index) => (
-                <HotspotInsightCard
-                  key={`${hotspot.keyword}-${hotspot.title}`}
-                  hotspot={hotspot}
-                  index={index}
-                />
-              ))}
-            </section>
+            <ReportPoster data={data} generatedTime={generatedTime} />
           ) : (
             <EmptyState />
           )}
-
-          <OperationsDailyReport report={data.dailyReport} />
-          <IntelligentExecutionPanel execution={data.intelligentExecution} />
-
-          {data.topHotspots.length > 0 ? (
-            <section className="promotion-panel">
-              <div className="section-heading">
-                <div>
-                  <p>Promotion Copy</p>
-                  <h2>推荐推广文案</h2>
-                </div>
-                <Sparkles size={21} />
-              </div>
-              <div className="copy-list">
-                {data.topHotspots.slice(0, 3).map((hotspot) => (
-                  <article key={`${hotspot.keyword}-copy`}>
-                    <span>{hotspot.keyword}</span>
-                    <p>{hotspot.recommendedPromotionCopy}</p>
-                  </article>
-                ))}
-              </div>
-            </section>
-          ) : null}
         </section>
       ) : null}
     </main>
+  );
+}
+
+function ReportPoster({
+  data,
+  generatedTime
+}: {
+  data: ManicureHotspotsData;
+  generatedTime: string;
+}) {
+  const topHotspots = data.topHotspots.slice(0, 5);
+  const sourceLabel = data.isSimulated ? "模拟数据" : "小红书 / Rnote";
+  const topStyles = Array.from(
+    new Set(topHotspots.flatMap((hotspot) => hotspot.suggestedStyles))
+  ).slice(0, 6);
+  const maxScore = Math.max(
+    1,
+    ...topHotspots.map((hotspot) => hotspot.hotspotScore)
+  );
+
+  return (
+    <article className="report-poster" aria-label="美甲运营报告图">
+      <header className="poster-header">
+        <div>
+          <p className="eyebrow">运营端 — AI助手智能运营</p>
+          <h2>{data.isSimulated ? "美甲热点 Review 模拟日报" : "美甲热点 Review 日报"}</h2>
+        </div>
+        <div className="poster-meta">
+          <span>
+            <CalendarDays size={15} />
+            {generatedTime}
+          </span>
+          <span>数据源：{sourceLabel}</span>
+        </div>
+      </header>
+
+      {data.isSimulated ? (
+        <section className="simulation-banner">
+          <strong>当前为模拟报告</strong>
+          <p>
+            真实小红书 API 暂不可用，系统仅用模拟数据展示报告格式和自动排序逻辑。
+            {data.fallbackReason ? ` 原因：${data.fallbackReason}` : ""}
+          </p>
+        </section>
+      ) : null}
+
+      <section className="poster-brief">
+        <ul>
+          <li>自动识别爆款趋势，按真实热度、相关性和可转化信号生成运营日报。</li>
+          <li>每日建议产出两份报告：上午用于上新排序，下午用于复核展出顺序。</li>
+          <li>输出可执行的商品置顶、AI 试戴款式池和内容发布建议。</li>
+        </ul>
+      </section>
+
+      <section className="poster-main">
+        <div className="poster-chart-card">
+          <div className="poster-card-title">
+            <BarChart3 size={18} />
+            <h3>趋势图</h3>
+          </div>
+          <div className="trend-chart" role="img" aria-label="今日美甲热点分趋势图">
+            {topHotspots.map((hotspot, index) => {
+              const height = Math.max(18, (hotspot.hotspotScore / maxScore) * 100);
+
+              return (
+                <div className="trend-bar-column" key={`${hotspot.keyword}-bar`}>
+                  <span>{Math.round(hotspot.hotspotScore)}</span>
+                  <div
+                    className="trend-bar"
+                    style={{ height: `${height}%` }}
+                    title={`${hotspot.keyword}：${hotspot.hotspotScore}`}
+                  />
+                  <p>{index + 1}</p>
+                </div>
+              );
+            })}
+          </div>
+          <div className="trend-axis">
+            {topHotspots.map((hotspot, index) => (
+              <span key={`${hotspot.keyword}-axis`}>
+                {index + 1}. {hotspot.keyword}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="poster-summary-card">
+          <div className="poster-card-title">
+            <Sparkles size={18} />
+            <h3>当天热点总结</h3>
+          </div>
+          <p>{data.summary}</p>
+          <div className="hot-style-cloud">
+            {topStyles.map((style) => (
+              <span key={style}>{style}</span>
+            ))}
+          </div>
+          <div className="top-hotspot-line">
+            <strong>最近爆火款式</strong>
+            <p>{topHotspots.map((hotspot) => hotspot.keyword).join(" / ")}</p>
+          </div>
+        </div>
+      </section>
+
+      <section className="poster-flow">
+        <PosterStep
+          title="趋势洞察"
+          items={topHotspots
+            .slice(0, 3)
+            .map(
+              (hotspot) =>
+                `${hotspot.keyword}：热点分 ${hotspot.hotspotScore}，${hotspot.reason}`
+            )}
+        />
+        <div className="poster-arrow">→</div>
+        <PosterStep
+          title="运营日报生成"
+          items={[
+            data.dailyReport.overview,
+            data.dailyReport.topTrendSummary,
+            ...data.dailyReport.contentSuggestions.slice(0, 1)
+          ]}
+        />
+        <div className="poster-arrow">→</div>
+        <PosterStep
+          title="智能调整执行"
+          items={[
+            ...data.intelligentExecution.homepageRecommendationUpdates.slice(0, 2),
+            ...data.intelligentExecution.styleListAdjustments.slice(0, 1)
+          ]}
+        />
+      </section>
+
+      <section className="poster-bottom">
+        <div>
+          <h3>每日两份报告建议</h3>
+          <ol>
+            <li>上午 10:00：根据最新热点更新首页推荐位和 AI 试戴入口。</li>
+            <li>下午 16:00：复核点击/咨询表现，调整商品展出顺序。</li>
+          </ol>
+        </div>
+        <div>
+          <h3>商品排序动作</h3>
+          <ol>
+            {data.intelligentExecution.merchantTodoList.slice(0, 3).map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      <footer className="poster-footer">
+        <CheckCircle2 size={18} />
+        <span>
+          {data.isSimulated
+            ? "模拟报告仅用于演示；真实 API 恢复后会自动切回真实小红书数据。"
+            : "报告基于真实接口返回数据生成；无数据或接口失败时不伪装为真实热点。"}
+        </span>
+      </footer>
+    </article>
+  );
+}
+
+function PosterStep({ title, items }: { title: string; items: string[] }) {
+  return (
+    <article className="poster-step">
+      <h3>{title}</h3>
+      <ul>
+        {items.slice(0, 4).map((item) => (
+          <li key={item}>{item}</li>
+        ))}
+      </ul>
+    </article>
   );
 }
 

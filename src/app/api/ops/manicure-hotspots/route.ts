@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { filterManicureTrends } from "@/services/manicureTrendFilter";
 import { generateManicureHotspotsReport } from "@/services/manicureReportGenerator";
 import { scoreManicureHotspots } from "@/services/manicureTrendScoring";
+import { generateSimulatedManicureHotspotsReport } from "@/services/simulatedManicureReport";
 import {
-  XhsApiConfigMissingError,
   XhsApiRequestError,
   fetchXhsHotTrends,
   fetchXhsKeywordTrends
@@ -50,31 +50,16 @@ export async function GET(request: NextRequest) {
       data
     });
   } catch (error) {
-    if (error instanceof XhsApiConfigMissingError) {
-      return NextResponse.json<ManicureHotspotsApiResponse>({
-        success: false,
-        error: {
-          code: error.code,
-          message: error.message
-        }
-      });
-    }
-
     const message =
       error instanceof XhsApiRequestError || error instanceof Error
         ? error.message
         : "Unknown Xiaohongshu API error.";
+    const data = generateSimulatedManicureHotspotsReport(limit, message);
 
-    return NextResponse.json<ManicureHotspotsApiResponse>(
-      {
-        success: false,
-        error: {
-          code: "XHS_API_REQUEST_FAILED",
-          message
-        }
-      },
-      { status: 502 }
-    );
+    return NextResponse.json<ManicureHotspotsApiResponse>({
+      success: true,
+      data
+    });
   }
 }
 

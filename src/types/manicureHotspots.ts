@@ -1,4 +1,4 @@
-export type XhsTrendSource = "xiaohongshu";
+export type XhsTrendSource = "xiaohongshu" | "simulated";
 
 export interface NormalizedXhsTrend {
   id: string;
@@ -63,6 +63,8 @@ export interface IntelligentExecution {
 export interface ManicureHotspotsData {
   generatedAt: string;
   dataSource: XhsTrendSource;
+  isSimulated?: boolean;
+  fallbackReason?: string;
   summary: string;
   topHotspots: Omit<ScoredManicureHotspot, "sourceTrend">[];
   dailyReport: OperationsDailyReport;
