@@ -1,0 +1,13 @@
+fastapi
+uvicorn[standard]
+python-multipart
+requests
+pydantic
+pillow
+opencv-python
+numpy
+torch
+diffusers
+mediapipe
+ultralytics
+scipy

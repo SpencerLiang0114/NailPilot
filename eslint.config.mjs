@@ -3,7 +3,7 @@ import tsParser from "@typescript-eslint/parser";
 
 const eslintConfig = [
   {
-    ignores: [".next/**", "node_modules/**"]
+    ignores: [".next/**", "node_modules/**", "backend/nail-tryon-ai/.venv/**"]
   },
   {
     files: ["**/*.{ts,tsx}"],
