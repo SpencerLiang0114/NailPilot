@@ -1,11 +1,11 @@
 import gradio as gr
 import requests  # 引入请求库，用来和 FastAPI 通信
 
-# ----------------- 1. 连接并拉取 FastAPI 的真实 74 款美甲数据 -----------------
+# ----------------- 1. 连接并拉取 FastAPI 的真实美甲数据 -----------------
 FASTAPI_BASE_URL = "http://127.0.0.1:8000"
 
 try:
-    # 页面启动时，直接去 FastAPI 拿洗好的 74 款美甲数据（包含图片、名称、ID）
+    # 页面启动时，直接去 FastAPI 拿洗好的美甲数据（包含图片、名称、ID）
     response = requests.get(f"{FASTAPI_BASE_URL}/")
     # 为了让 Gradio 稳定拿到纯净的商品 JSON，我们也可以通过访问 health 或者定义好的列表
     # 这里我们直接向 FastAPI 发起一个基础请求。为了100%安全，我们在前端加载时动态拉取数据。
@@ -22,10 +22,11 @@ def get_all_products_from_backend():
         with open("products.json", "r", encoding="utf-8") as f:
             return json.load(f)
     except:
-        # 如果读取失败，自动生成基础的 74 款兜底
-        return [{"id": f"nail_{i:03d}", "name": f"美甲款式 {i:03d}", "image": f"/static/images/nail_{i:03d}.jpg"} for i in range(1, 75)]
+        # 如果读取失败，自动生成基础兜底
+        return [{"id": f"nail_{i:03d}", "name": f"美甲款式 {i:03d}", "image": f"/static/images/nail_{i:03d}.jpg"} for i in range(1, 58)]
 
 ALL_PRODUCTS = get_all_products_from_backend()
+PRODUCT_COUNT = len(ALL_PRODUCTS)
 
 
 # ----------------- 2. 完美的自定义 CSS（跑马灯横滑 + 美团黄） -----------------
@@ -81,7 +82,7 @@ h1, h2, h3, h4, p, span, label, .markdown-text { color: #111111 !important; }
 # ----------------- 3. 核心业务交互逻辑 -----------------
 
 def load_initial_nails():
-    """初始化加载：把 74 款美甲平铺进滑动展示栏"""
+    """初始化加载：把美甲款式平铺进滑动展示栏"""
     # 这里将图片路径或线上的 url 提出来传给 Gallery
     # 注意：如果你的 products.json 里包含 http 链接，直接可以用；如果是相对路径，Gradio 也能直接识别
     return [(p.get("image", ""), p.get("name", "")) for p in ALL_PRODUCTS]
@@ -140,7 +141,7 @@ def trigger_tryon_and_recommend(selected_id, hand_img):
     if not recommended_gallery_data:
         recommended_gallery_data = [(p["image"], p["name"]) for p in ALL_PRODUCTS[:8]]
         
-    # 返回试戴结果图，并且把 74 款的选择栏自动“缩减刷新”为 8 款精准推荐美甲
+    # 返回试戴结果图，并且把选择栏自动“缩减刷新”为 8 款精准推荐美甲
     return result_image, recommended_gallery_data
 
 
@@ -160,12 +161,12 @@ with gr.Blocks(css=custom_css) as demo:
         # 左侧控制面板
         with gr.Column(scale=14):
             with gr.Column(elem_classes="step-title"):
-                gr.Markdown("<h4><span style='color:#FFC000; margin-right:8px;'>●</span>STEP 1: 左右滑动选择美甲款式（共 74 款）</h4>")
+                gr.Markdown(f"<h4><span style='color:#FFC000; margin-right:8px;'>●</span>STEP 1: 左右滑动选择美甲款式（共 {PRODUCT_COUNT} 款）</h4>")
             
             # 核心滑动组件
             nail_gallery = gr.Gallery(
                 label="可选美甲款式",
-                columns=74, # 极宽的列数强制在一行内挤压
+                columns=PRODUCT_COUNT, # 极宽的列数强制在一行内挤压
                 rows=1,
                 height=170,
                 allow_preview=False,
@@ -207,13 +208,13 @@ with gr.Blocks(css=custom_css) as demo:
 
     # ----------------- 5. 绑定动态连环事件 -----------------
     
-    # 1. 页面打开时，把 74 款美甲塞进 Gallery 
+    # 1. 页面打开时，把美甲款式塞进 Gallery 
     demo.load(fn=load_initial_nails, outputs=nail_gallery)
     
     # 2. 只要用户点击滑动栏里的任何一款图，暗地里更新选中的 ID
     nail_gallery.select(fn=on_nail_selected, outputs=selected_nail_id_holder)
     
-    # 3. 点击大按钮：不仅出试戴图，还要把那 74 款的滑动栏冲刷成 FastAPI 算出来的 8 款强相关推荐
+    # 3. 点击大按钮：不仅出试戴图，还要把滑动栏冲刷成 FastAPI 算出来的 8 款强相关推荐
     submit_btn.click(
         fn=trigger_tryon_and_recommend,
         inputs=[selected_nail_id_holder, hand_input],

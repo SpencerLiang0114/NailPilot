@@ -4,13 +4,13 @@ Meituan hackathon project for **AI Manicure Try-On and Smart Operations**.
 
 The repo now contains both user-side virtual nail try-on and merchant-side intelligent operations:
 
-- `/user`: consumer-facing AI nail try-on flow with a 74-style carousel, hand-photo upload, real FastAPI try-on backend proxy, and 8-style personalized recommendations.
+- `/user`: consumer-facing AI nail try-on flow with a 57-style carousel, hand-photo upload, real FastAPI try-on backend proxy, and 8-style personalized recommendations.
 - `/merchant`: merchant entry route, redirected to the manicure hotspot operations dashboard.
 - `/ops/manicure-hotspots`: merchant-side trend review, daily report, and execution suggestions.
 
 ## Features
 
-- **User AI try-on**: select one of 74 nail styles, upload a hand photo, and request real try-on generation from the FastAPI backend.
+- **User AI try-on**: select one of 57 nail styles, upload a hand photo, and request real try-on generation from the FastAPI backend.
 - **Personalized recommendations**: after try-on, replace the same carousel with 8 recommended nail styles based on the selected product ID.
 - **美甲热点 Review**: manually generate a manicure trend report from the dashboard.
 - **Trend chart**: visualizes the top manicure hotspot scores in a pink-purple pearl report card.
@@ -157,7 +157,7 @@ Do not commit `.env.local`. API keys must stay server-side.
 ### User Try-On Flow
 
 1. The user opens `/user`.
-2. The frontend loads 74 nail products from `GET /api/user/initial-products`.
+2. The frontend loads 57 nail products from `GET /api/user/initial-products`.
 3. The user selects a product ID and uploads a hand photo.
 4. The frontend posts multipart form data to `POST /api/user/nail-tryon`.
 5. Next.js proxies the request to FastAPI `POST /api/nail_tryon`.
