@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "美甲热点 Review",
-  description: "基于小红书实时趋势生成今日运营日报与款式调整建议"
+  title: "Nail Art World Cup",
+  description: "美甲世界杯双端平台入口"
 };
 
 export default function RootLayout({
