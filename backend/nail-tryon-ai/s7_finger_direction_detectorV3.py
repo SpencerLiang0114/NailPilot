@@ -8,8 +8,8 @@ finger_direction_detector.py (v2 - 修复SAM3 API)
 
 用法:
   conda activate meijia
-  python E:\meijia\finger_direction_detector.py
-  python E:\meijia\finger_direction_detector.py --single a8
+  python s7_finger_direction_detectorV3.py
+  python s7_finger_direction_detectorV3.py --single a8
 """
 
 import os
@@ -608,7 +608,7 @@ def process_single_image(img_path: str, config: Config,
 
     # 策略B: 如果自然手图失败，试原 hands/ 图（美甲有时提供视觉参照）
     if finger_data is None:
-        orig_path = os.path.join(r"E:\meijia\hands", f"{base_name}.png")
+        orig_path = os.path.join("./hands", f"{base_name}.png")
         if os.path.exists(orig_path):
             print("  自然图 MediaPipe 失败，尝试原图...")
             orig_img = cv2.imread(orig_path)

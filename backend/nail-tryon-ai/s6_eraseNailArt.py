@@ -7,7 +7,7 @@ eraseNailArt.py  — 擦除美甲，恢复自然素手
   2. SD Inpainting 在掩码白色区域内生成自然指甲
   3. 羽化融合回原图
 
-运行：python E:\meijia\eraseNailArt.py
+运行：python s6_eraseNailArt.py
 """
 
 import os, sys, cv2, numpy as np, torch

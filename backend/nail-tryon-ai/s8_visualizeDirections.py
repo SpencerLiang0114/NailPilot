@@ -2,7 +2,6 @@
 import os, json, cv2, numpy as np
 from pathlib import Path
 
-#SRC  = r"E:\meijia\hands_natural"
 SRC  = "./s6_hands_natural"
 JSON = "./s7_hands_direction"
 OUT  = "./s8_hands_direction_vis"

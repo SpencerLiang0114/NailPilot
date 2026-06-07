@@ -5,5 +5,14 @@
 node_modules
 dist
 coverage
+__pycache__/
+*.py[cod]
 *.tsbuildinfo
 *.swp
+backend/nail-tryon-ai/.venv/
+backend/nail-tryon-ai/legacy/
+backend/nail-tryon-ai/sys/
+*.pt
+*.pth
+*.ckpt
+*.safetensors

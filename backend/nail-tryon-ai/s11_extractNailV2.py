@@ -1,8 +1,8 @@
 """
 s11_extractNailV2.py — 分割手掌图中各手指甲，按大拇指→小拇指保存为 fingernail1~5.png
 
-输入：E:\meijia\finalCode\s6_hands_natural\*.png
-输出：E:\meijia\finalCode\s11_getFingerNail\<stem>\fingernail1.png ~ fingernail5.png
+输入：./s6_hands_natural/*.png
+输出：./s11_getFingerNail/<stem>/fingernail1.png ~ fingernail5.png
 """
 
 import os
