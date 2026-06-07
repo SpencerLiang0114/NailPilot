@@ -1,120 +1,289 @@
 # Nail Art World Cup｜美甲 AI 试戴与智能运营
 
-美团黑客松参赛项目，面向赛题「美甲 AI 试戴与智能运营」。
+> 美团黑客松参赛项目，面向赛题「美甲 AI 试戴与智能运营」。  
+> 本项目将用户端 AI 美甲试戴与商家端趋势运营连接成一个完整闭环：用户通过上传手部照片获得真实试戴效果，商家则基于趋势数据生成热点日报、款式排序建议和可执行运营动作。
 
-本项目尝试把用户端的 AI 美甲试戴和商家端的热点运营串成一个可落地的闭环：用户上传手部照片后选择美甲款式，系统生成上手试戴效果并推荐相似款；商家侧则根据小红书/Rnote 趋势数据生成美甲热点日报、款式排序建议和运营执行清单。
+---
 
-## 赛题背景
+## 项目简介
 
-美甲消费的核心问题不是“有没有款式”，而是用户和商家都缺少实时、直观、可执行的判断依据。
+美甲消费的核心问题并不是“款式不够多”，而是用户和商家都缺少实时、直观、可执行的判断依据。
 
-用户侧痛点：
+在用户端，消费者很难提前判断一款美甲是否适合自己的肤色、手型和风格，因此容易出现决策时间长、沟通成本高、下单转化低的问题。
 
-- 无法预见真实上手效果，担心款式与肤色、手型不匹配。
-- 线下试戴和沟通成本高，决策周期长，容易放弃下单。
-- 款式很多但选择困难，需要更贴近当前偏好的推荐。
+在商家端，门店通常依赖人工观察社交平台趋势、手动调整推荐位和款式排序，容易出现趋势识别滞后、热门款错过最佳运营窗口、内容发布与商品上新脱节等问题。
 
-运营侧痛点：
+本项目尝试构建一个可运行的闭环系统：
 
-- 热门款识别依赖人工观察，滞后且容易错过运营窗口。
-- 推荐位、款式列表、内容发布和库存动作缺少统一决策依据。
-- 用户“所见”和商家“所感知”的趋势之间存在信息延迟。
+1. **用户端**：提供 AI 美甲试戴，降低用户决策成本。
+2. **运营端**：根据趋势数据生成美甲热点日报和运营建议。
+3. **业务闭环**：让用户试戴结果、推荐款式池和商家运营策略随热点变化动态更新。
 
-项目目标是构建一个完整系统，而不是单点 demo：
+---
 
-1. 用户端：提供可视化的 AI 美甲试戴体验，降低决策成本。
-2. 运营端：把趋势洞察转成日报、榜单和具体执行动作。
-3. 闭环：让试戴款式池、推荐位和商家运营策略随热点变化而更新。
+## 核心功能
 
-## 已实现功能
+### 1. 用户端：AI 美甲试戴应用
 
-### 用户端：AI 美甲试戴应用
+访问路径：
 
-访问路径：`/user`
+```text
+/user
+```
 
-- 从后端加载美甲商品库，当前使用 `products.json` 中的 57 款初始款式。
-- 支持用户上传手部照片，并在页面中预览。
-- 支持选择美甲款式后调用 FastAPI 后端生成真实试戴图。
-- 试戴完成后，根据当前款式 ID 生成 8 款个性化推荐，并替换原款式轮播。
-- 保留商品 ID 作为推荐和试戴的集成键，避免只依赖图片 URL 或展示名称。
+主要能力：
 
-### 运营端：AI 助手智能运营
+- 支持用户上传手部照片。
+- 支持从本地商品库中选择美甲款式。
+- 调用 FastAPI 后端生成 AI 美甲试戴图。
+- 根据当前试戴款式生成 8 款相似推荐。
+- 使用商品 ID 作为推荐、试戴和展示的统一集成键，避免只依赖图片 URL 或展示名称。
 
-访问路径：`/ops/manicure-hotspots`
+当前商品数据来自：
 
-- 支持输入关键词，如 `美甲`、`猫眼`、`穿戴甲`，手动生成运营日报。
-- 接入 Rnote/小红书趋势接口，拉取热搜和关键词内容。
+```text
+backend/nail-tryon-ai/products.json
+```
+
+目前内置 57 款初始美甲商品。
+
+---
+
+### 2. 运营端：AI 助手智能运营
+
+访问路径：
+
+```text
+/ops/manicure-hotspots
+```
+
+主要能力：
+
+- 支持输入关键词，例如 `美甲`、`猫眼`、`穿戴甲`。
 - 对趋势数据进行美甲相关性过滤、去重和打分。
 - 生成热点榜、趋势图、当天热点总结和运营日报。
-- 输出可执行建议，包括首页推荐位、款式列表排序、内容发布计划、AI 试戴款式池更新和商家 todo。
-- 当真实 API 不可用、未配置或额度不足时，返回明确标记的模拟报告，页面会显示“模拟数据”提示。
+- 输出可执行运营建议，包括：
+  - 首页推荐位调整
+  - 款式列表排序
+  - 内容发布计划
+  - AI 试戴款式池更新
+  - 商家 todo list
 
-### 门户页
+数据源说明：
 
-访问路径：`/`
+- 项目预留小红书趋势数据接入能力。
+- 真实趋势数据需要通过合规 API、平台授权或第三方数据服务接入。
+- 当真实数据源未配置、不可用或额度不足时，系统会返回明确标记的模拟报告。
+- 前端会同步展示“模拟数据”提示，避免将降级数据误认为真实趋势。
 
-- 提供用户端和商家端入口。
-- 以 Nail Art World Cup 作为参赛作品入口品牌。
+---
+
+### 3. 门户页
+
+访问路径：
+
+```text
+/
+```
+
+门户页作为参赛作品入口，提供两个核心入口：
+
+- 用户端 AI 美甲试戴
+- 商家端智能运营面板
+
+---
+
+## Demo Flow
+
+### 用户端流程
+
+```text
+用户打开 /user
+        ↓
+加载美甲商品库
+        ↓
+上传手部照片
+        ↓
+选择美甲款式
+        ↓
+调用 AI 试戴后端
+        ↓
+生成试戴结果图
+        ↓
+返回相似款推荐
+```
+
+### 运营端流程
+
+```text
+商家打开 /ops/manicure-hotspots
+        ↓
+输入趋势关键词
+        ↓
+获取趋势数据
+        ↓
+过滤美甲相关内容
+        ↓
+计算热点分数
+        ↓
+生成热点日报
+        ↓
+输出运营建议和执行清单
+```
+
+---
 
 ## 系统架构
 
 ```text
 Next.js App Router
+├── /
+│   └── 项目门户页
+│
 ├── /user
 │   ├── GET  /api/user/initial-products
 │   ├── POST /api/user/nail-tryon
 │   └── POST /api/user/recommendations
+│
 ├── /ops/manicure-hotspots
 │   └── GET /api/ops/manicure-hotspots
+│
 └── FastAPI Backend
-    ├── /api/initial_products
-    ├── /api/nail_tryon
-    └── /recommendations
+    ├── GET  /api/initial_products
+    ├── POST /api/nail_tryon
+    └── POST /recommendations
 ```
 
-主要技术栈：
+---
+
+## 技术栈
+
+### Frontend
 
 - Next.js App Router
 - React
 - TypeScript
+- Tailwind CSS
+
+### Backend
+
 - FastAPI
-- Python AI 试戴 pipeline
-- Rnote/小红书数据 API
-- 本地美甲商品库与推荐逻辑
+- Python
+- Local AI try-on pipeline
+- Local product recommendation logic
+
+### Data & Recommendation
+
+- 本地美甲商品库
+- 趋势数据适配层
+- 美甲相关性过滤
+- 热度、增长、新颖性、转化潜力等多维度打分
+- 模拟数据降级策略
+
+---
+
+## 后端试戴模型流程
+
+后端试戴模型负责将“美甲商品图”和“用户手部照片”对齐到同一空间，并生成自然贴合的虚拟佩戴效果。
+
+整体流程分为三步：
+
+### 1. 分割与目标剥离
+
+模型首先识别：
+
+- 商品图中的美甲区域
+- 用户手部照片中的指甲区域
+
+随后生成对应的 segmentation mask，将美甲款式从原始背景中剥离出来，形成可单独处理的美甲素材。
+
+### 2. 手部姿态与边界估计
+
+系统结合手部关键点和指甲区域 mask，估计每根手指的：
+
+- 指尖位置
+- 指甲边界
+- 手指方向
+- 旋转角度
+- 目标贴合区域
+
+这些信息用于确定美甲素材在用户手部照片中的位置、角度和尺寸。
+
+### 3. 对齐、缩放与融合
+
+后端根据目标指甲区域对美甲素材进行：
+
+- 旋转
+- 平移
+- 自适应缩放
+- 边界融合
+
+最终生成 AI 美甲试戴图。
+
+本流程的目标不是简单贴图，而是在保留商品纹理、颜色和风格的同时，使试戴结果在方向、大小和边界上尽量接近真实佩戴效果。
+
+---
 
 ## 代码结构
 
 ```text
-src/app/page.tsx                         # 入口门户
-src/app/user/page.tsx                    # 用户端 AI 试戴页面
-src/app/merchant/page.tsx                # 商家端跳转入口
-src/app/ops/manicure-hotspots/page.tsx   # 运营端热点面板
-src/app/api/user/*                       # 用户端 Next.js 代理 API
-src/app/api/ops/manicure-hotspots        # 运营日报生成 API
-src/components/ops/*                     # 运营端展示组件
-src/services/*                           # 趋势拉取、过滤、打分、报告生成
-backend/nail-tryon-ai/api.py             # FastAPI 试戴与推荐服务
-backend/nail-tryon-ai/run_pipeline.py    # AI 试戴 pipeline 入口
-backend/nail-tryon-ai/products.json      # 美甲商品数据
-backend/nail-tryon-ai/美甲图74个          # 本地美甲款式图
+src/
+├── app/
+│   ├── page.tsx
+│   ├── user/page.tsx
+│   ├── merchant/page.tsx
+│   ├── ops/manicure-hotspots/page.tsx
+│   └── api/
+│       ├── user/
+│       │   ├── initial-products
+│       │   ├── nail-tryon
+│       │   └── recommendations
+│       └── ops/manicure-hotspots
+│
+├── components/
+│   └── ops/
+│
+├── services/
+│   ├── trend fetching
+│   ├── trend filtering
+│   ├── scoring
+│   └── report generation
+│
+└── backend/
+    └── nail-tryon-ai/
+        ├── api.py
+        ├── run_pipeline.py
+        ├── recommender.py
+        ├── products.json
+        └── 美甲图74个/
 ```
+
+---
 
 ## 本地运行
 
-项目需要同时启动前端和后端两个进程：
+项目需要同时启动前端和后端两个进程。
 
-- Next.js 前端：`http://127.0.0.1:3000`
-- FastAPI 试戴后端：`http://127.0.0.1:8000`
+默认地址：
+
+```text
+Next.js 前端:      http://127.0.0.1:3000
+FastAPI 后端:     http://127.0.0.1:8000
+```
 
 常用页面：
 
-- 作品入口：`http://127.0.0.1:3000`
-- 用户试戴：`http://127.0.0.1:3000/user`
-- 运营面板：`http://127.0.0.1:3000/ops/manicure-hotspots`
+```text
+作品入口:          http://127.0.0.1:3000
+用户试戴:          http://127.0.0.1:3000/user
+运营面板:          http://127.0.0.1:3000/ops/manicure-hotspots
+```
 
-### macOS
+---
 
-启动前端：
+## macOS 启动方式
+
+### 1. 启动前端
 
 ```bash
 pnpm install
@@ -122,30 +291,39 @@ cp .env.example .env.local
 pnpm exec next dev --hostname 127.0.0.1 --port 3000
 ```
 
-启动后端：
+### 2. 启动后端
 
 ```bash
 cd backend/nail-tryon-ai
+
 uv venv
 uv pip install -r requirements.txt
+
 export NAIL_TRYON_SAM3_WEIGHTS=/absolute/path/sam3.pt
 export NAIL_TRYON_SD_INPAINTING_DIR=/absolute/path/stable-diffusion-inpainting
 export NAIL_TRYON_PUBLIC_BASE_URL=http://127.0.0.1:8000
+
 .venv/bin/python -m uvicorn api:app --host 127.0.0.1 --port 8000
 ```
 
-也可以使用脚本启动后端：
+也可以使用脚本启动：
 
 ```bash
 cd backend/nail-tryon-ai
 ./start_backend.sh
 ```
 
-### Windows
+---
 
-建议将仓库放在简单英文路径，例如 `D:\projects\Beauty_Nai1s-merchants`。
+## Windows 启动方式
 
-启动前端：
+建议将仓库放在简单英文路径下，例如：
+
+```text
+D:\projects\Beauty_Nai1s-merchants
+```
+
+### 1. 启动前端
 
 ```powershell
 pnpm install
@@ -153,43 +331,45 @@ copy .env.example .env.local
 pnpm exec next dev --hostname 127.0.0.1 --port 3000
 ```
 
-启动后端：
+### 2. 启动后端
 
 ```powershell
 cd backend\nail-tryon-ai
+
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
+
 pip install -r requirements.txt
+
 $env:NAIL_TRYON_SAM3_WEIGHTS="D:\models\sam3\sam3.pt"
 $env:NAIL_TRYON_SD_INPAINTING_DIR="D:\models\stable-diffusion-inpainting"
 $env:NAIL_TRYON_PUBLIC_BASE_URL="http://127.0.0.1:8000"
+
 python -m uvicorn api:app --host 127.0.0.1 --port 8000
 ```
 
-如果 Windows 机器有 NVIDIA GPU，请安装匹配 CUDA 版本的 PyTorch，并检查：
+如果 Windows 机器有 NVIDIA GPU，请安装匹配 CUDA 版本的 PyTorch，并检查 GPU 是否可用：
 
 ```powershell
 python -c "import torch; print(torch.cuda.is_available())"
 ```
 
+---
+
 ## 环境变量
 
-前端 `.env.local` 可从 `.env.example` 复制：
+### 前端 `.env.local`
+
+可从 `.env.example` 复制：
 
 ```env
-XHS_API_BASE_URL=https://rnote.dev
-XHS_API_TOKEN=
-XHS_HOT_SEARCH_ENDPOINT=/api/v2/crawler/creator/hot/inspiration/feed
-XHS_KEYWORD_SEARCH_ENDPOINT=/api/v2/crawler/search/notes
-XHS_API_AUTH_HEADER=X-API-Key
-XHS_API_AUTH_SCHEME=
-XHS_API_METHOD=GET
-XHS_API_EXTRA_HEADERS=
-XHS_HOT_SEARCH_PAGE_SIZE=50
-XHS_KEYWORD_SEARCH_PAGE_SIZE=20
-
 NAIL_TRYON_API_BASE_URL=http://127.0.0.1:8000
+
+# 可选：趋势数据 API token
+XHS_API_TOKEN=
 ```
+
+### 后端环境变量
 
 后端模型路径通过 shell 环境变量配置，不应暴露给浏览器：
 
@@ -199,31 +379,31 @@ NAIL_TRYON_SD_INPAINTING_DIR=/absolute/path/stable-diffusion-inpainting
 NAIL_TRYON_PUBLIC_BASE_URL=http://127.0.0.1:8000
 ```
 
-不要提交 `.env.local`、真实 API key、本地模型权重或生成结果目录。
+请不要提交以下内容：
+
+```text
+.env.local
+真实 API key
+本地模型权重
+生成结果目录
+临时缓存文件
+```
+
+---
 
 ## 数据与降级策略
 
-### 用户试戴流程
+### 用户试戴
 
-1. 用户打开 `/user`。
-2. 前端调用 `GET /api/user/initial-products` 加载美甲商品。
-3. 用户选择款式并上传手部照片。
-4. 前端向 `POST /api/user/nail-tryon` 提交 `product_id` 和图片文件。
-5. Next.js 将请求代理到 FastAPI `POST /api/nail_tryon`。
-6. FastAPI 运行 Python 试戴 pipeline 并返回生成图片。
-7. 前端调用 `POST /api/user/recommendations`。
-8. 页面展示 8 款推荐美甲。
+用户试戴流程依赖 FastAPI 后端和本地模型路径。
 
-### 运营日报流程
+如果模型路径未配置或模型文件不存在，后端会返回错误信息，前端应提示用户检查后端环境变量和模型文件路径。
 
-1. 商家在运营面板点击“生成报告”。
-2. 后端请求 Rnote/小红书热搜和关键词接口。
-3. 系统将接口返回内容标准化为趋势记录。
-4. 美甲趋势过滤器筛选相关内容。
-5. 打分模块按热度、相关性、增长、新颖性、商家可执行性和转化潜力排序。
-6. 报告生成器输出日报、热点榜和执行建议。
+### 运营日报
 
-真实接口失败时，API 仍会返回成功响应，但数据会标记为：
+运营日报支持真实数据源和模拟数据降级。
+
+当真实 API 不可用时，接口仍会返回结构完整的报告，但会标记为：
 
 ```json
 {
@@ -232,11 +412,20 @@ NAIL_TRYON_PUBLIC_BASE_URL=http://127.0.0.1:8000
 }
 ```
 
-页面会同步显示模拟数据提示。真实 API 恢复后，同一页面会回到真实趋势数据。
+前端会根据该字段展示模拟数据提示。
+
+这样可以保证：
+
+- 演示流程不中断。
+- 页面结构保持完整。
+- 真实数据和模拟数据不会混淆。
+- 后续接入真实趋势数据时不需要重构前端展示层。
+
+---
 
 ## 验证命令
 
-前端：
+### 前端
 
 ```bash
 pnpm run lint
@@ -244,24 +433,99 @@ pnpm run typecheck
 pnpm run build
 ```
 
-后端：
+### 后端
 
 ```bash
 cd backend/nail-tryon-ai
+
 .venv/bin/python -m py_compile api.py run_pipeline.py recommender.py
 curl http://127.0.0.1:8000/health
 ```
 
+---
+
 ## 评审标准对应
 
-- 完整性：包含用户端试戴、商家端日报、推荐逻辑、真实 API 接入和模拟降级。
-- 创新性：把“上手效果可视化”和“热点运营自动化”放在同一业务闭环中。
-- 应用效果：用户可以直接上传图片体验试戴，商家可以生成当天可执行运营动作。
-- 商业价值：帮助降低用户决策成本，提高款式转化效率，并为门店上新、推荐位和内容运营提供依据。
+### 完整性
+
+项目覆盖用户端、商家端和门户页，不是单一页面 demo。
+
+已实现能力包括：
+
+- 用户上传手部照片
+- 美甲款式选择
+- AI 试戴生成
+- 相似款推荐
+- 运营日报生成
+- 热点榜和趋势图
+- 商家执行建议
+- 真实数据接入预留
+- 模拟数据降级
+
+### 创新性
+
+项目将“AI 上手效果可视化”和“AI 运营决策自动化”结合在同一业务闭环中。
+
+用户侧的试戴数据可以反向影响商家侧的推荐位、款式池和运营重点；商家侧的热点识别也可以进一步影响用户侧的商品展示和推荐策略。
+
+### 应用效果
+
+用户可以直接上传图片体验美甲试戴，降低下单前的不确定性。
+
+商家可以通过热点日报快速了解当天趋势，并获得具体到推荐位、款式排序、内容发布和库存动作的执行建议。
+
+### 商业价值
+
+项目能够帮助平台和商家：
+
+- 降低用户决策成本
+- 提高美甲款式转化效率
+- 缩短热点识别到运营执行的时间
+- 优化首页推荐位和商品排序
+- 支持门店上新、内容运营和库存准备
+
+---
 
 ## 公开仓库说明
 
-- 真实模型权重、API key、`.env.local` 和本地生成资产不应提交。
-- 后端真实试戴依赖 `NAIL_TRYON_SAM3_WEIGHTS` 和 `NAIL_TRYON_SD_INPAINTING_DIR` 指向有效本地模型。
-- 未配置小红书/Rnote token 时，运营端会展示明确标记的模拟报告。
-- 本项目是黑客松参赛原型，重点展示完整业务链路和可运行的核心能力。
+本项目为黑客松参赛原型，重点展示完整业务链路和可运行的核心能力。
+
+公开仓库不包含：
+
+- 真实模型权重
+- 真实 API key
+- `.env.local`
+- 本地生成资产
+- 私有数据文件
+
+后端真实试戴功能依赖以下环境变量指向有效本地模型：
+
+```env
+NAIL_TRYON_SAM3_WEIGHTS
+NAIL_TRYON_SD_INPAINTING_DIR
+```
+
+未配置趋势 API token 时，运营端会展示明确标记的模拟报告。
+
+---
+
+## Project Status
+
+当前版本已完成：
+
+- 用户端 AI 美甲试戴主流程
+- FastAPI 后端试戴接口
+- 商品库加载
+- 相似款推荐
+- 商家端热点运营面板
+- 热点日报生成
+- 模拟数据降级
+- 门户页入口
+
+后续可扩展方向：
+
+- 接入稳定的真实趋势数据源
+- 增加用户试戴偏好记录
+- 引入更精细的手型、肤色和风格匹配算法
+- 将运营端建议与商品管理、库存和发布系统联动
+- 增加商家侧 A/B 测试和转化数据反馈
