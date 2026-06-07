@@ -31,53 +31,28 @@ The repo now contains both user-side virtual nail try-on and merchant-side intel
 
 ## Getting Started
 
-### Frontend
+The app has two local processes:
+
+- Next.js frontend: `http://127.0.0.1:3000`
+- FastAPI try-on backend: `http://127.0.0.1:8000`
+
+Open pages:
+
+- Portal: `http://127.0.0.1:3000`
+- User try-on: `http://127.0.0.1:3000/user`
+- Merchant dashboard: `http://127.0.0.1:3000/ops/manicure-hotspots`
+
+### macOS
+
+Frontend:
 
 ```bash
 pnpm install
-```
-
-Create a local environment file:
-
-```bash
 cp .env.example .env.local
-```
-
-Set your Rnote API key in `.env.local`:
-
-```env
-XHS_API_TOKEN=your_rnote_api_key
-```
-
-Run the Next.js development server:
-
-```bash
 pnpm exec next dev --hostname 127.0.0.1 --port 3000
 ```
 
-Open the portal:
-
-```text
-http://127.0.0.1:3000
-```
-
-Merchant operations dashboard:
-
-```text
-http://127.0.0.1:3000/ops/manicure-hotspots
-```
-
-User-side AI try-on page:
-
-```text
-http://127.0.0.1:3000/user
-```
-
-### User Try-On Backend
-
-The `/user` page talks to the FastAPI backend through the Next.js proxy routes under `/api/user/*`.
-
-Run the user-side FastAPI backend from this repository:
+Backend:
 
 ```bash
 cd backend/nail-tryon-ai
@@ -85,22 +60,63 @@ uv venv
 uv pip install -r requirements.txt
 export NAIL_TRYON_SAM3_WEIGHTS=/absolute/path/sam3.pt
 export NAIL_TRYON_SD_INPAINTING_DIR=/absolute/path/stable-diffusion-inpainting
+export NAIL_TRYON_PUBLIC_BASE_URL=http://127.0.0.1:8000
 .venv/bin/python -m uvicorn api:app --host 127.0.0.1 --port 8000
 ```
 
-Do not run bare `uvicorn api:app` from an Anaconda/base shell; it can use the wrong Python environment and fail with `ModuleNotFoundError: No module named 'fastapi'`. You can also use:
+You can also start the backend with:
 
 ```bash
 cd backend/nail-tryon-ai
 ./start_backend.sh
 ```
 
-The backend exposes:
+### Windows
 
-- `GET /health`
-- `GET /api/initial_products`
-- `POST /api/nail_tryon`
-- `POST /recommendations`
+Use PowerShell. Put the repo in a simple English path such as `D:\projects\Beauty_Nai1s-merchants`.
+
+Frontend:
+
+```powershell
+pnpm install
+copy .env.example .env.local
+pnpm exec next dev --hostname 127.0.0.1 --port 3000
+```
+
+Backend:
+
+```powershell
+cd backend\nail-tryon-ai
+python -m venv .venv
+.\.venv\Scripts\Activate.ps1
+pip install -r requirements.txt
+$env:NAIL_TRYON_SAM3_WEIGHTS="D:\models\sam3\sam3.pt"
+$env:NAIL_TRYON_SD_INPAINTING_DIR="D:\models\stable-diffusion-inpainting"
+$env:NAIL_TRYON_PUBLIC_BASE_URL="http://127.0.0.1:8000"
+python -m uvicorn api:app --host 127.0.0.1 --port 8000
+```
+
+If the Windows machine has an NVIDIA GPU, install the matching CUDA build of PyTorch and verify:
+
+```powershell
+python -c "import torch; print(torch.cuda.is_available())"
+```
+
+The backend creates links under `backend/nail-tryon-ai/sys/` for model files. If Windows symlinks are disabled, it may copy the model files instead; this can be slow and use extra disk space. Enabling Windows Developer Mode avoids that.
+
+### Verify
+
+Backend:
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Frontend:
+
+```text
+http://127.0.0.1:3000/user
+```
 
 The Next.js user APIs proxy to `http://127.0.0.1:8000` by default. Override with `NAIL_TRYON_API_BASE_URL` in `.env.local` if the backend runs elsewhere.
 

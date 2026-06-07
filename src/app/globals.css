@@ -1712,24 +1712,11 @@ select {
 
 .gesture-hand {
   align-self: center;
-  width: 82px;
+  width: 96px;
   height: 118px;
-  border-radius: 42px 42px 28px 28px;
-  background:
-    radial-gradient(circle at 50% 18%, rgba(255, 255, 255, 0.76), transparent 22px),
-    linear-gradient(160deg, #ffd5c5 0%, #f2a99a 60%, #dd817f 100%);
+  border-radius: 18px;
   box-shadow: inset 0 8px 18px rgba(255, 255, 255, 0.4), 0 16px 34px rgba(137, 80, 170, 0.16);
-}
-
-.gesture-hand-palm {
-  transform: rotate(-8deg);
-}
-
-.gesture-hand-back {
-  transform: rotate(8deg);
-  background:
-    radial-gradient(circle at 54% 28%, rgba(255, 255, 255, 0.52), transparent 20px),
-    linear-gradient(160deg, #ffe1d4 0%, #f0ad9d 58%, #d77982 100%);
+  object-fit: cover;
 }
 
 .tryon-action {

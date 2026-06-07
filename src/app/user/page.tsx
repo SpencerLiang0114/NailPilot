@@ -264,13 +264,13 @@ export default function UserTryOnPage() {
               </label>
 
               <div className="gesture-card">
-                <div className="gesture-hand gesture-hand-palm" aria-hidden="true" />
+                <img className="gesture-hand" src="/handpose-a.jpg" alt="" aria-hidden="true" />
                 <strong>手势 A</strong>
                 <span>手心朝上</span>
               </div>
 
               <div className="gesture-card">
-                <div className="gesture-hand gesture-hand-back" aria-hidden="true" />
+                <img className="gesture-hand" src="/handpose-b.jpg" alt="" aria-hidden="true" />
                 <strong>手势 B</strong>
                 <span>手背朝上</span>
               </div>
