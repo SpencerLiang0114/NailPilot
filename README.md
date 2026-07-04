@@ -67,20 +67,26 @@ Next.js App Router
 
 ## Try-On Model Pipeline
 
-The backend aligns a selected nail-art product image with the user's hand photo and generates a blended virtual try-on result.
+The customer-side AI try-on module is designed for users who want to check whether a nail style fits their skin tone and hand shape before paying for an offline appointment. Users can choose from the 57-product digital nail catalog, upload a hand photo, and send the selected style to the FastAPI backend for local GPU-assisted generation.
 
-1. **Segmentation**
-   - Detects the nail-art region in the product image.
-   - Detects nail regions in the user's hand photo.
-   - Produces masks so the nail-art design can be isolated from its original background.
+The backend aligns the selected nail-art product image with the user's hand photo through an end-to-end computer vision pipeline:
 
-2. **Hand and nail geometry**
-   - Estimates fingertip positions, nail boundaries, finger direction, rotation, and target placement areas.
-   - Uses those signals to determine where each nail-art asset should be placed.
+1. **Style and hand segmentation**
+   - Uses SAM3 semantic segmentation to detect the nail-art region in the product image and the native nail regions in the uploaded hand photo.
+   - Converts the detected nail-art design into independent RGBA nail slices while preserving the original orientation and transparent mask boundaries.
+   - Produces binary masks, cropped assets, and intermediate debug outputs for each stage of the pipeline.
 
-3. **Alignment and blending**
-   - Rotates, translates, scales, and blends the design into the target nail regions.
-   - Preserves the design's texture and color while matching the hand photo's geometry as closely as possible.
+2. **Hand and nail geometry extraction**
+   - Uses MediaPipe Hands to estimate 21 hand landmarks and derive finger direction vectors from fingertip and joint positions.
+   - Computes nail and finger angles so each product nail can be matched to the user's thumb, index, middle, ring, and pinky directions.
+   - Maps each product nail and target fingernail mask to top and bottom extreme points along the finger-direction axis.
+
+3. **Adaptive alignment and compositing**
+   - Rotates each RGBA nail slice to match the corresponding finger direction while keeping the full rotated image content.
+   - Uses the nail-bed root point as the placement anchor, then translates each product nail onto the detected native nail bottom point.
+   - Alpha-blends the aligned design back onto the hand image to generate the final pixel-level virtual try-on result.
+
+The public setup expects local model files for SAM3 and the inpainting model. On CUDA-capable machines, the pipeline can use GPU acceleration; hackathon demos were designed around a high-end NVIDIA GPU such as an RTX 4090.
 
 ## Repository Layout
 
