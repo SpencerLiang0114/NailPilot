@@ -9,6 +9,10 @@ NailPilot is a prototype for AI-powered nail try-on and merchant operations. It 
 
 The project was built for a Meituan hackathon scenario, but this public repository is structured as a standalone technical report and runnable prototype.
 
+## Demo
+
+![NailPilot demo](docs/assets/nailpilot.png)
+
 ## What It Does
 
 ### Customer Try-On
