@@ -2,7 +2,7 @@
   {
     "id": "nail_003",
     "name": "黑红棋盘爱心",
-    "image": "http://p1.meituan.net/pilotimages/7bb5bc0c2c741f9f0aa63787a601d7ad2604877.png",
+    "image": "/static/images/nail_003.jpg",
     "color": [
       "black",
       "red"
@@ -37,7 +37,7 @@
   {
     "id": "nail_005",
     "name": "奶牛法式",
-    "image": "http://p1.meituan.net/pilotimages/3c0d090e20f0cb56f70fcb56c54dd6582416974.png",
+    "image": "/static/images/nail_005.jpg",
     "color": [
       "white",
       "black",
@@ -73,7 +73,7 @@
   {
     "id": "nail_009",
     "name": "朋克星星",
-    "image": "http://p1.meituan.net/pilotimages/69614397f0ecb559b98cb46a5a46f3b32642714.png",
+    "image": "/static/images/nail_009.jpg",
     "color": [
       "black",
       "transparent"
@@ -108,7 +108,7 @@
   {
     "id": "nail_015",
     "name": "童趣小红花格子跳色",
-    "image": "http://p0.meituan.net/pilotimages/1248ad42d355b98257e5fbcdf90efc552138079.png",
+    "image": "/static/images/nail_015.jpg",
     "color": [
       "nude",
       "red",
@@ -147,7 +147,7 @@
   {
     "id": "nail_017",
     "name": "奢华法式珍珠大钻饰",
-    "image": "http://p0.meituan.net/pilotimages/ec437f6291295904c2f894edb8c01cb82131722.png",
+    "image": "/static/images/nail_017.jpg",
     "color": [
       "nude",
       "white"
@@ -183,7 +183,7 @@
   {
     "id": "nail_018",
     "name": "裸透多色几何钻饰",
-    "image": "http://p0.meituan.net/pilotimages/5591229138c4e7e1d183b59be442d9dc2267735.png",
+    "image": "/static/images/nail_018.jpg",
     "color": [
       "transparent",
       "red",
@@ -219,7 +219,7 @@
   {
     "id": "nail_021",
     "name": "琥珀晕染蓝边大平钻",
-    "image": "http://p0.meituan.net/pilotimages/f4b69d45af5d3b496adbd9d21e768a8e2195181.png",
+    "image": "/static/images/nail_021.jpg",
     "color": [
       "brown",
       "blue",
@@ -257,7 +257,7 @@
   {
     "id": "nail_025",
     "name": "红法式丝带蝴蝶结",
-    "image": "http://p1.meituan.net/pilotimages/73ee568aa09547d8bfc0168113ac9ebc2712329.png",
+    "image": "/static/images/nail_025.jpg",
     "color": [
       "nude",
       "red"

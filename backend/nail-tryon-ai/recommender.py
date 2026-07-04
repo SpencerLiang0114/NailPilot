@@ -176,7 +176,7 @@ if __name__ == "__main__":
     products = load_products("products.json")
 
     # 模拟用户当前试戴商品
-    current_product_id = "nail_001"
+    current_product_id = "nail_003"
 
     recommendations = recommend_products(
         current_product_id=current_product_id,

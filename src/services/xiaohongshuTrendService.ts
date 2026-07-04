@@ -4,10 +4,9 @@ import type { NormalizedXhsTrend } from "@/types/manicureHotspots";
 
 type JsonRecord = Record<string, unknown>;
 
-const DEFAULT_XHS_API_BASE_URL = "https://rnote.dev";
-const DEFAULT_XHS_HOT_SEARCH_ENDPOINT =
-  "/api/v2/crawler/creator/hot/inspiration/feed";
-const DEFAULT_XHS_KEYWORD_SEARCH_ENDPOINT = "/api/v2/crawler/search/notes";
+const DEFAULT_XHS_API_BASE_URL = "";
+const DEFAULT_XHS_HOT_SEARCH_ENDPOINT = "";
+const DEFAULT_XHS_KEYWORD_SEARCH_ENDPOINT = "";
 
 interface XhsApiConfig {
   baseUrl: string;
@@ -78,9 +77,9 @@ function getXhsApiConfig(): XhsApiConfig {
     process.env.XHS_HOT_SEARCH_ENDPOINT?.trim() ||
     DEFAULT_XHS_HOT_SEARCH_ENDPOINT;
 
-  if (!token) {
+  if (!baseUrl || !token || !hotSearchEndpoint) {
     throw new XhsApiConfigMissingError(
-      "Missing Xiaohongshu API configuration. Please configure XHS_API_TOKEN. XHS_API_BASE_URL defaults to https://rnote.dev."
+      "Missing Xiaohongshu API configuration. Please configure XHS_API_BASE_URL, XHS_API_TOKEN, and XHS_HOT_SEARCH_ENDPOINT."
     );
   }
 

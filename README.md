@@ -28,7 +28,7 @@ The current public catalog contains 57 nail products.
 Route: `/ops/manicure-hotspots`
 
 - Accepts trend keywords such as `nail art`, `cat eye nails`, or `press-on nails`.
-- Fetches Xiaohongshu/Rnote trend data when API credentials are configured.
+- Fetches Xiaohongshu trend data when approved API credentials are configured.
 - Filters, deduplicates, and scores manicure-related trend items.
 - Generates a hotspot report with rankings, trend summaries, and merchant actions.
 - Produces suggestions for homepage placement, product ordering, content planning, try-on pool updates, and execution tasks.
@@ -195,10 +195,10 @@ Important variables:
 ```env
 NAIL_TRYON_API_BASE_URL=http://127.0.0.1:8000
 
-XHS_API_BASE_URL=https://rnote.dev
+XHS_API_BASE_URL=
 XHS_API_TOKEN=
-XHS_HOT_SEARCH_ENDPOINT=/api/v2/crawler/creator/hot/inspiration/feed
-XHS_KEYWORD_SEARCH_ENDPOINT=/api/v2/crawler/search/notes
+XHS_HOT_SEARCH_ENDPOINT=
+XHS_KEYWORD_SEARCH_ENDPOINT=
 XHS_API_AUTH_HEADER=X-API-Key
 XHS_API_AUTH_SCHEME=
 XHS_API_METHOD=GET
@@ -263,14 +263,14 @@ curl http://127.0.0.1:8000/health
 
 ## Public Repository Notes
 
-This repository does not include private credentials, private datasets, generated local assets, or model weights. Real try-on generation requires valid local model files referenced by:
+This repository does not include private credentials, private datasets, generated local outputs, or SAM3 / Stable Diffusion model weights. Real try-on generation requires valid local model files referenced by:
 
 ```env
 NAIL_TRYON_SAM3_WEIGHTS
 NAIL_TRYON_SD_INPAINTING_DIR
 ```
 
-Without a configured Xiaohongshu/Rnote API token, the operations dashboard shows a labeled simulated report.
+Without configured Xiaohongshu API credentials, the operations dashboard shows a labeled simulated report.
 
 ## Status
 

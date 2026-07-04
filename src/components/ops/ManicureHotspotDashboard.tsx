@@ -156,7 +156,7 @@ function ReportPoster({
   generatedTime: string;
 }) {
   const topHotspots = data.topHotspots.slice(0, 5);
-  const sourceLabel = data.isSimulated ? "模拟数据" : "小红书 / Rnote";
+  const sourceLabel = data.isSimulated ? "模拟数据" : "小红书数据源";
   const topStyles = Array.from(
     new Set(topHotspots.flatMap((hotspot) => hotspot.suggestedStyles))
   ).slice(0, 6);
