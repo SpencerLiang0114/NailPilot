@@ -2,6 +2,8 @@
 
 NailPilot is a prototype for AI-powered nail try-on and merchant operations. It connects two workflows in one product loop:
 
+> Project for Meituan Hackathon
+
 - Customers upload a hand photo, choose a nail design, and preview the result before purchase.
 - Merchants review nail-art trend signals, ranked styles, and operational suggestions for content, merchandising, and try-on inventory.
 
